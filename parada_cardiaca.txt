@@ -1,0 +1,103 @@
+ ------------------- Query principales -------------------
+ 
+ select pactid tipodocumento, pacide documento, (pacnom || ' ' || pacap1 || ' ' || pacap2) nombre, 
+ pachis historia, 
+ (clsnom || ' / ' || ubinom) ubicacion, 
+ epiinahab habitacion,  
+ to_char(pacnac, 'YYYY/MM/DD') fechanacimiento, 
+ (CASE WHEN ((sysdate - pacnac)/365.25) >= 1 THEN trunc((sysdate - pacnac)/365.25) ELSE trunc((sysdate - pacnac)/30) END) || ' ' ||  
+ (CASE WHEN ((sysdate - pacnac)/365.25) >= 1 THEN 'Años' ELSE 'Meses' END) edad,  
+ (select regdianom from hhregdia where regdiasrc = regclisec and regdiappl = 'S') diagnosticoprinciapl, 
+ (select rtrim (xmlagg (xmlelement (e, regdianom || ', ')).extract ('//text()'), ' , ')  from hhregdia where regdiasrc = regclisec and regdiappl <> 'S') diagnosticosecundario, 
+ to_char(regclifch, 'YYYY/MM/DD HH24:MI') fechanota 
+ from hhregcli 
+ inner join hiepiina on epiinaepi = regcliepi and epiinafen >= (sysdate - 10)  
+ inner join abpac on pachis = epiinahis and (TRUNC(sysdate -pacnac) / 365.25) >= 5 and (TRUNC(sysdate -pacnac) / 365.25) <= 75 
+ inner join inubi on ubicod = epiinaubi 
+ inner join inser on sercod = ubiser 
+ inner join incls on clscod = sercla 
+ where regclipro = 'C010' 
+ and regclifch >= (sysdate - 10 / 1440);
+ 
+ 
+ correo usuario = ["centralreferencia@hptu.org.co,gestiontrasplantes@hptu.org.co"];
+
+Asunto correo = "Reporte parada cardiaca"
+
+function columnaTabla(tipodoc, documento, nombre, historia,ubicacion,habitacion,fechanac,edad,diagp,diags,fechanota) {
+    var NewColumna = "<tr style='width: 25%;text-align: left;vertical-align: top;border: 1px solid #000;border-collapse: collapse;font-size: 12px'>"
+        + "<td>" + tipodoc + "</td>"
+        + "<td>" + documento + "</td>"
+        + "<td>" + nombre + "</td>"
+        + "<td>" + historia + "</td>"
+        + "<td>" + ubicacion + "</td>"
+        + "<td>" + habitacion + "</td>"
+        + "<td>" + fechanac + "</td>"
+        + "<td>" + edad + "</td>"
+        + "<td>" + diagp + "</td>"
+        + "<td>" + diags + "</td>"
+        + "<td>" + fechanota + "</td>"
+        + "</tr>";
+
+    return NewColumna;
+}
+
+function EnvioCorreo(contenidoTabla) {
+
+    var body = "<table>"
+        + "<tr>"
+        + "    <td>"
+        + "        <p style='font-family: century gothic;'>"
+        + "        </p>"
+        + "    </td>"
+        + "</tr>"
+        + "<tr>"
+        + "    <td>"
+        + "        <p style='font-family: century gothic;'>"
+        + "            <em>Cordial saludo, </em>&nbsp;"
+        + "            <br><br>A continuación encontrará ilustrado de pacientes para reporte de parada cardiaca."
+        + "        </p>"
+        + "        <table border='1' style='font-family: century gothic; border: 1px solid #515421;' class='table-class'>"
+        + "            <tr"
+        + "                style='width: 25%;text-align: left;vertical-align: top;border: 1px solid #000;border-collapse: collapse;'>"
+        + "                <th>Tipo de documento</th>"
+        + "                <th>Documento</th>"
+        + "                <th>Nombre</th>"
+        + "                <th>Historia</th>"
+        + "                <th>Ubicación</th>"
+        + "                <th>Habitación</th>"
+        + "                <th>Fecha de nacimiento</th>"
+        + "                <th>Edad</th>" 
+        + "                <th>Diagnóstico principal</th>" 
+        + "                <th>Diagnóstico secundario</th>" 
+        + "                <th>Fecha nota</th>" 
+        + "            </tr>"
+        + contenidoTabla
+        + "        </table>"
+        + "        <p style='font-family: century gothic;'>"
+        + "            <em>Cordialmente,&nbsp;</em>"
+        + "        </p>"
+        + "        <p>"
+        + "            <h3 style='font-family: century gothic; font-size: 12px;'>"
+        + "                <strong>Hospital Pablo Tobón uribe</strong>"
+        + "            </h3>"
+        + "        </p>"
+        + "    </td>"
+        + "</tr>"
+        + "<tr>"
+        + "    <td>"
+        + "        <p style='font-family: century gothic;'>"
+        + "            <em><strong>Nota</strong>: Este es un correo enviado de forma"
+        + "                autom&aacute;tica, por favor no responda.</em>&nbsp;"
+        + "        </p>"
+        + "    </td>"
+        + "</tr>"
+        + "<tr>"
+        + "    <td>"
+        + "        <div>"
+        + "            <img align='middle' src='https://www.hptu.org.co/images/inferior1.png' width='50%'></img>"
+        + "        </div>"
+        + "    </td>"
+        + "</tr>"
+        + "</table>"; 
+}

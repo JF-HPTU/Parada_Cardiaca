@@ -1,0 +1,5 @@
+
+Se ha presentado un error al abrir la base de datos Oracle fecha : {fecha_actual}
+Se ha presentado un error al abrir la base de datos Oracle fecha : 31-03-2025 -08:5138
+Se ha presentado un error al abrir la base de datos Oracle fecha : 31-03-2025 -08:52:47
+Se ha presentado un error al abrir la base de datos Oracle fecha : 31-03-2025 08:53:18
